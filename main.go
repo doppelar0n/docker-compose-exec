@@ -82,7 +82,7 @@ func getAllComposeSearchPaths() []string {
 	envPaths := strings.Split(envPathString, ":")
 
 	for _, path := range append(envPaths, standardPaths...) {
-		trimmedPath = strings.TrimSuffix(path, "/")
+		trimmedPath := strings.TrimSuffix(path, "/")
 		if !slices.Contains(paths, trimmedPath) {
 			paths = append(paths, trimmedPath)
 		}
