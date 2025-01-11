@@ -1,17 +1,20 @@
 # docker-compose-exec
 
-A CLI tool for discovering Docker Compose files and services across multiple directories. It provides an interactive terminal UI for selecting Compose files and services, then executes custom commands (e.g., docker exec) on the selected service. 
+A CLI tool for discovering Docker Compose files and services across multiple directories. It provides an interactive terminal UI for selecting Compose files and services, then executes custom commands (e.g., docker exec) on the selected service.
 
-## Features  
+## Features
 
-- Automatically searches for Docker Compose files (`docker-compose.yml`, `compose.yml`, etc.) in predefined paths.  
-- Interactive terminal-based UI for selecting Compose files and services.  
-- Executes a configurable shell command on the selected service.  
+- Automatically searches for Docker Compose files (`docker-compose.yml`, `compose.yml`, etc.) in predefined paths.
+- Interactive terminal-based UI for selecting Compose files and services.
+- Executes a configurable shell command on the selected service.
 
-## Installation  
+## Installation
 
-1. Download the latest release binary from the [releases page](https://github.com/your-username/docker-compose-exec/releases).  
-2. Copy the binary to `/usr/local/bin`:  
+1. Download the latest release binary from the [releases page](https://github.com/your-username/docker-compose-exec/releases).
+```bash
+wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec
+```
+2. Copy the binary to `/usr/local/bin`:
 ```bash
 sudo mv docker-compose-exec /usr/local/bin
 ```
@@ -50,14 +53,14 @@ You can configure the following environment variables:
 Imagine you have the following directory structure:
 
 ```bash
-/var/container  
-├── project1/  
-│   └── docker-compose.yml  
-├── project2/  
-│   └── compose.yml  
-/srv/container  
-└── project3/  
-    └── docker-compose.yaml  
+/var/container
+├── project1/
+│   └── docker-compose.yml
+├── project2/
+│   └── compose.yml
+/srv/container
+└── project3/
+    └── docker-compose.yaml
 ```
 
 Running `docker-compose-exec` will:
