@@ -81,16 +81,10 @@ func getAllComposeSearchPaths() ([]string) {
 	envPathString := os.Getenv("CONTAINER_BASE_PATH")
 	envPaths := strings.Split(envPathString, ":")
 
-	for _, envPath := range envPaths {
-		envPath = strings.TrimSuffix(envPath, "/")
-		if !slices.Contains(paths, envPath) {
-			paths = append(paths, envPath)
-		}
-	}
-
-	for _, standardPath := range standardPaths {
-		if !slices.Contains(paths, standardPath) {
-			paths = append(paths, standardPath)
+	for _, path := range append(envPaths, standardPaths...) {
+		trimmedPath := strings.TrimSuffix(path, "/")
+		if !slices.Contains(paths, trimmedPath) {
+			paths = append(paths, trimmedPath)
 		}
 	}
 
