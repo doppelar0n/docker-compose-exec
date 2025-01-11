@@ -67,4 +67,9 @@ Running `docker-compose-exec` will:
 - Execute the configured command (e.g., docker exec) on the chosen service.
 
 ## Contributing
+
 Contributions are welcome! Please open an issue or submit a pull request with any enhancements or bug fixes.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
