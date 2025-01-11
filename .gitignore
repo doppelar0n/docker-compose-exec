@@ -7,6 +7,7 @@
 *.dll
 *.so
 *.dylib
+docker-compose-exec
 
 # Test binary, built with `go test -c`
 *.test
