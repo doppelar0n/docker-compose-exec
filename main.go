@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/yaml.v3"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -83,9 +82,7 @@ func getAllComposeSearchPaths() ([]string) {
 	envPaths := strings.Split(envPathString, ":")
 
 	for _, envPath := range envPaths {
-		if strings.HasSuffix(envPath, "/") {
-			envPath = envPath[:len(envPath)-1] 
-		}
+		envPath = strings.TrimSuffix(envPath, "/")
 		if !slices.Contains(paths, envPath) {
 			paths = append(paths, envPath)
 		}
@@ -115,7 +112,7 @@ func getAllComposeFiles() ([]string, string, error) {
 func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 	var serviceKeys []string
 
-	data, err := ioutil.ReadFile(dockerComposeYml)
+	data, err := os.ReadFile(dockerComposeYml)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +135,7 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 	return serviceKeys, nil
 }
 
-func runDockerExec(dockerComposeYml string, dockerService string) () {
+func runDockerExec(dockerComposeYml string, dockerService string) (error) {
 	fmt.Printf("%s, %s\n", dockerComposeYml, dockerService)
 
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
@@ -162,7 +159,8 @@ func runDockerExec(dockerComposeYml string, dockerService string) () {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+	err := cmd.Run()
+	return err
 }
 
 func main() {
@@ -216,6 +214,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	runDockerExec(dockerComposeYml, dockerService)
+	err = runDockerExec(dockerComposeYml, dockerService)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		os.Exit(1)
+	}
 }
 
