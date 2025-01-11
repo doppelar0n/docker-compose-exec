@@ -208,7 +208,11 @@ func main() {
 
 	err = form.Run()
 	if err != nil {
-		fmt.Println("Error: %s", err)
+		if err.Error() == "user aborted" {
+			fmt.Printf("Script terminated by User\n")
+			os.Exit(130)
+		}
+		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
 	}
 
