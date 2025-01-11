@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/charmbracelet/huh"
 	"gopkg.in/yaml.v3"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"slices"
-	"github.com/charmbracelet/huh"
+	"strings"
 )
 
 func isDirectory(path string) (bool, error) {
@@ -71,10 +71,10 @@ func getComposeFiles(basePath string) ([]string, error) {
 	return composeFiles, nil
 }
 
-func getAllComposeSearchPaths() ([]string) {
+func getAllComposeSearchPaths() []string {
 	var paths []string
 
-	standardPaths := []string {
+	standardPaths := []string{
 		"/var/container",
 		"/srv/container",
 	}
@@ -82,7 +82,7 @@ func getAllComposeSearchPaths() ([]string) {
 	envPaths := strings.Split(envPathString, ":")
 
 	for _, path := range append(envPaths, standardPaths...) {
-		trimmedPath := strings.TrimSuffix(path, "/")
+		trimmedPath = strings.TrimSuffix(path, "/")
 		if !slices.Contains(paths, trimmedPath) {
 			paths = append(paths, trimmedPath)
 		}
@@ -129,7 +129,7 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 	return serviceKeys, nil
 }
 
-func runDockerExec(dockerComposeYml string, dockerService string) (error) {
+func runDockerExec(dockerComposeYml string, dockerService string) error {
 	fmt.Printf("%s, %s\n", dockerComposeYml, dockerService)
 
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
@@ -161,7 +161,7 @@ func main() {
 
 	var (
 		dockerComposeYml string
-		dockerService string
+		dockerService    string
 	)
 
 	allComposeFiles, paths, err := getAllComposeFiles()
@@ -214,4 +214,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
