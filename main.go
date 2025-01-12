@@ -168,7 +168,7 @@ func main() {
 			os.Exit(0)
 		}
 		fmt.Println(help)
-		fmt.Println(help)
+		fmt.Println()
 		fmt.Println("Version: " + version)
 		os.Exit(0)
 	}
