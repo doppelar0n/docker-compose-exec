@@ -31,6 +31,7 @@ jobs:
         TAG_NAME="v$(date +'%Y%m%d-%H%M%S')-$(git rev-parse --short HEAD)"
         echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
         echo "Generated tag: $TAG_NAME"
+        echo "TAG_NAME=$TAG_NAME" > VERSION
 
     - name: Install dependencies
       run: go mod tidy
@@ -44,6 +45,13 @@ jobs:
       with:
         name: docker-compose-exec-${{ matrix.arch }}
         path: docker-compose-exec-${{ matrix.arch }}
+    
+    - name: Upload VERSION Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: VERSION
+        path: VERSION
+
 
   release:
     needs: build
@@ -62,6 +70,17 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: docker-compose-exec-arm64
+
+    - name: Download VERSION Tag
+      uses: actions/download-artifact@v4
+      with:
+        name: VERSION
+
+    - name: Set TAG_NAME environment variable
+      run: |
+        TAG_NAME=$(cat VERSION)
+        echo "TAG_NAME=$TAG_NAME" >> $GITHUB_ENV
+        echo "Using tag: $TAG_NAME"
 
     - name: Create Release
       id: create_release
