@@ -12,6 +12,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+
     steps:
     - name: Check out the code
       uses: actions/checkout@v4
@@ -25,13 +29,14 @@ jobs:
       run: go mod tidy
 
     - name: Build the Go application
-      run: go build -o docker-compose-exec 
+      run: |
+        GOARCH=${{ matrix.arch }} go build -o docker-compose-exec-${{ matrix.arch }}
 
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: docker-compose-exec 
-        path: docker-compose-exec 
+        name: docker-compose-exec-${{ matrix.arch }}
+        path: docker-compose-exec-${{ matrix.arch }}
 
   release:
     needs: build
@@ -41,10 +46,15 @@ jobs:
     - name: Check out the code
       uses: actions/checkout@v4
 
-    - name: Download build artifact
+    - name: Download build artifacts
       uses: actions/download-artifact@v4
       with:
-        name: docker-compose-exec 
+        name: docker-compose-exec-amd64
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: docker-compose-exec-arm64
 
     - name: Generate Release Tag
       id: generate_tag
@@ -64,12 +74,22 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload Release Asset for amd64
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./docker-compose-exec 
-        asset_name: docker-compose-exec 
+        asset_path: ./docker-compose-exec-amd64
+        asset_name: docker-compose-exec-amd64
+        asset_content_type: application/octet-stream
+
+    - name: Upload Release Asset for arm64
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./docker-compose-exec-arm64
+        asset_name: docker-compose-exec-arm64
         asset_content_type: application/octet-stream
