@@ -13,8 +13,10 @@ import (
 	"strings"
 )
 
-//go:embed README.md
-var readme string
+//go:embed HELP.md
+var help string
+
+var version = "development"
 
 func isDirectory(path string) (bool, error) {
 	info, err := os.Stat(path)
@@ -134,8 +136,6 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 }
 
 func runDockerExec(dockerComposeYml string, dockerService string) error {
-	fmt.Printf("%s, %s\n", dockerComposeYml, dockerService)
-
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
 	if dockerExecCommand == "" {
 		dockerExecCommand = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
@@ -162,8 +162,13 @@ func runDockerExec(dockerComposeYml string, dockerService string) error {
 }
 
 func main() {
-	if len(os.Args) > 0 {
-		fmt.Println(readme)
+	if len(os.Args) > 1 {
+		if len(os.Args) == 2 && os.Args[1] == "--version" {
+			fmt.Println(version)
+			os.Exit(0)
+		}
+		fmt.Println(help)
+		os.Exit(0)
 	}
 
 	var (
