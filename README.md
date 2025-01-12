@@ -1,6 +1,7 @@
 # docker-compose-exec
 
-A CLI tool for discovering Docker Compose files and services across multiple directories. It provides an interactive terminal UI for selecting Compose files and services, then executes custom commands (e.g., docker exec) on the selected service.
+A CLI tool for discovering Docker Compose files and their services across multiple directories.  
+Select a Compose file and service interactively, then execute a custom command on the service.
 
 ## Features
 
@@ -12,11 +13,11 @@ A CLI tool for discovering Docker Compose files and services across multiple dir
 
 1. Download the latest release binary from the [releases page](https://github.com/your-username/docker-compose-exec/releases).
 ```bash
-wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec
+wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec-amd64
 ```
 2. Copy the binary to `/usr/local/bin`:
 ```bash
-sudo mv docker-compose-exec /usr/local/bin
+sudo mv docker-compose-exec-amd64 /usr/local/bin/docker-compose-exec
 ```
 3. Make the binary executable:
 ```bash
@@ -29,6 +30,7 @@ Just run:
 ```bash
 docker-compose-exec
 ```
+This launch the tool with default paths and interactive UI.
 
 ### Optional Environment Variables
 
@@ -68,6 +70,16 @@ Running `docker-compose-exec` will:
 - Allow you to select a file (e.g., project1/docker-compose.yml).
 - List available services from the selected file.
 - Execute the configured command (e.g., docker exec) on the chosen service.
+
+### more Examples:
+  CONTAINER_BASE_PATH="/var/mycontainers:/srv/containers" docker-compose-exec
+      Specify custom search paths for Compose files.
+
+  CONTAINER_EXEC_COMMAND="docker compose -f %COMPOSE exec %SERVICE /bin/bash" docker-compose-exec
+      Use a custom execution command.
+
+  CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
+      This is like dry run.
 
 ## Contributing
 
