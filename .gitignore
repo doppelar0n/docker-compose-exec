@@ -8,6 +8,7 @@
 *.so
 *.dylib
 docker-compose-exec
+docker-compose-exec-*
 
 # Test binary, built with `go test -c`
 *.test
