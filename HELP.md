@@ -23,3 +23,8 @@ Examples:
 
   CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
       This is like dry run.
+
+Contributions & Support:
+  Bugs, feature requests, improvements, or contributions are welcome!  
+  For updates and more information, visit:  
+  https://github.com/doppelar0n/docker-compose-exec
