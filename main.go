@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/charmbracelet/huh"
@@ -11,6 +12,9 @@ import (
 	"slices"
 	"strings"
 )
+
+//go:embed README.md
+var readme string
 
 func isDirectory(path string) (bool, error) {
 	info, err := os.Stat(path)
@@ -158,6 +162,9 @@ func runDockerExec(dockerComposeYml string, dockerService string) error {
 }
 
 func main() {
+	if len(os.Args) > 0 {
+		fmt.Println(readme)
+	}
 
 	var (
 		dockerComposeYml string
