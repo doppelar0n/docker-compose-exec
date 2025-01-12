@@ -10,6 +10,8 @@ permissions:
 
 jobs:
   version:
+    runs-on: ubuntu-latest
+
     steps:
     - name: Generate Release Tag
       id: generate_tag
