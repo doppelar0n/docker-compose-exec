@@ -11,7 +11,7 @@ Select a Compose file and service interactively, then execute a custom command o
 
 ## Installation
 
-1. Download the latest release binary from the [releases page](https://github.com/your-username/docker-compose-exec/releases).
+1. Download the latest release binary from the [releases page](https://github.com/doppelar0n/docker-compose-exec/releases).
     ```bash
     wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec-amd64
     ```
