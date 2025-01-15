@@ -12,17 +12,17 @@ Select a Compose file and service interactively, then execute a custom command o
 ## Installation
 
 1. Download the latest release binary from the [releases page](https://github.com/your-username/docker-compose-exec/releases).
-```bash
-wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec-amd64
-```
+    ```bash
+    wget https://github.com/doppelar0n/docker-compose-exec/releases/latest/download/docker-compose-exec-amd64
+    ```
 2. Copy the binary to `/usr/local/bin`:
-```bash
-sudo mv docker-compose-exec-amd64 /usr/local/bin/docker-compose-exec
-```
+    ```bash
+    sudo mv docker-compose-exec-amd64 /usr/local/bin/docker-compose-exec
+    ```
 3. Make the binary executable:
-```bash
-sudo chmod +x /usr/local/bin/docker-compose-exec
-```
+    ```bash
+    sudo chmod +x /usr/local/bin/docker-compose-exec
+    ```
 
 ## Usage
 
@@ -72,14 +72,19 @@ Running `docker-compose-exec` will:
 - Execute the configured command (e.g., docker exec) on the chosen service.
 
 ### more Examples:
-  CONTAINER_BASE_PATH="/var/mycontainers:/srv/containers" docker-compose-exec
-      Specify custom search paths for Compose files.
+- Specify custom search paths for Compose files.
+    ```bash
+    CONTAINER_BASE_PATH="/var/mycontainers:/srv/containers" docker-compose-exec
+    ```
+- Use a custom execution command.
+    ```bash
+    CONTAINER_EXEC_COMMAND="docker compose -f %COMPOSE exec %SERVICE /bin/bash" docker-compose-exec
+    ```
+- This is like dry run. (--dry-run)
+    ```bash
+    CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
+    ```
 
-  CONTAINER_EXEC_COMMAND="docker compose -f %COMPOSE exec %SERVICE /bin/bash" docker-compose-exec
-      Use a custom execution command.
-
-  CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
-      This is like dry run.
 
 ## Contributing
 
