@@ -61,7 +61,7 @@ func getComposeFiles(basePath string) ([]string, error) {
 		return nil, err
 	}
 	if !isDir {
-		return nil, fmt.Errorf("%s is not a Directory.", basePath)
+		return nil, fmt.Errorf("%s is not a Directory", basePath)
 	}
 
 	subdirs, err := getSubdirectories(basePath)
@@ -128,7 +128,7 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 
 	services, ok := rawData["services"].(map[string]interface{})
 	if !ok {
-		return nil, errors.New("rawData[\"services\"].(map[string]interface{}) is no ok!")
+		return nil, errors.New("rawData[\"services\"].(map[string]interface{}) is no ok")
 	}
 
 	for key := range services {
@@ -146,9 +146,10 @@ func runDockerExec(dockerComposeYml string, dockerService string) error {
 
 	dockerExecCommandParts := strings.Split(dockerExecCommand, " ")
 	for i, part := range dockerExecCommandParts {
-		if part == "%COMPOSE" {
+		switch part {
+		case "%COMPOSE":
 			dockerExecCommandParts[i] = dockerComposeYml
-		} else if part == "%SERVICE" {
+		case "%SERVICE":
 			dockerExecCommandParts[i] = dockerService
 		}
 	}
