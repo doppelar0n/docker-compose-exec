@@ -13,8 +13,8 @@ import (
 	"strings"
 )
 
-var DEFAULT_CONTAINER_BASE_PATH = "/var/container:/srv/container"
-var DEFAULT_CONTAINER_EXEC_COMMAND = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
+var defaultContainerBasePath = "/var/container:/srv/container"
+var defaultContainerExecCommand = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
 
 //go:embed HELP.md
 var help string
@@ -85,7 +85,7 @@ func getAllComposeSearchPaths() []string {
 
 	containerBasePathString := os.Getenv("CONTAINER_BASE_PATH")
 	if containerBasePathString == "" {
-		containerBasePathString = DEFAULT_CONTAINER_BASE_PATH
+		containerBasePathString = defaultContainerBasePath
 	}
 
 	containerBasePaths := strings.Split(containerBasePathString, ":")
@@ -141,7 +141,7 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 func runDockerExec(dockerComposeYml string, dockerService string) error {
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
 	if dockerExecCommand == "" {
-		dockerExecCommand = DEFAULT_CONTAINER_EXEC_COMMAND
+		dockerExecCommand = defaultContainerExecCommand
 	}
 
 	dockerExecCommandParts := strings.Split(dockerExecCommand, " ")
