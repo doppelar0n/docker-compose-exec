@@ -100,10 +100,10 @@ func getAllComposeFiles() ([]string, string, error) {
 	return composeFilePaths, strings.Join(paths, " "), nil
 }
 
-func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
+func getDockerServiceArray(dockerComposeYaml string) ([]string, error) {
 	var serviceKeys []string
 
-	data, err := os.ReadFile(dockerComposeYml)
+	data, err := os.ReadFile(dockerComposeYaml)
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func getDockerServiceArray(dockerComposeYml string) ([]string, error) {
 	return serviceKeys, nil
 }
 
-func runDockerExec(dockerComposeYml string, dockerService string) error {
+func runDockerExec(dockerComposeYaml string, dockerService string) error {
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
 	if dockerExecCommand == "" {
 		dockerExecCommand = defaultContainerExecCommand
@@ -136,7 +136,7 @@ func runDockerExec(dockerComposeYml string, dockerService string) error {
 	for i, part := range dockerExecCommandParts {
 		switch part {
 		case "%COMPOSE":
-			dockerExecCommandParts[i] = dockerComposeYml
+			dockerExecCommandParts[i] = dockerComposeYaml
 		case "%SERVICE":
 			dockerExecCommandParts[i] = dockerService
 		}
@@ -161,12 +161,12 @@ func main() {
 		}
 		fmt.Println(help)
 		fmt.Println()
-		fmt.Println("Version: " + version)
+		fmt.Printf("Version: %s\n", version)
 		os.Exit(0)
 	}
 
 	var (
-		dockerComposeYml string
+		dockerComposeYaml string
 		dockerService    string
 	)
 
@@ -177,7 +177,7 @@ func main() {
 		os.Exit(1)
 	}
 	if len(allComposeFiles) == 0 {
-		fmt.Println("Error: no docker compose.yml found in ", paths)
+		fmt.Printf("Error: no docker Docker Compose YAML found in %s\n", paths)
 		os.Exit(1)
 	}
 
@@ -185,20 +185,20 @@ func main() {
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Options(huh.NewOptions(allComposeFiles...)...).
-				Value(&dockerComposeYml).
-				Title("Docker Compose yml"),
+				Value(&dockerComposeYaml).
+				Title("Docker Compose YAML"),
 			huh.NewSelect[string]().
 				Value(&dockerService).
 				TitleFunc(func() string {
-					return "Services in " + dockerComposeYml
-				}, &dockerComposeYml).
+					return "Services in " + dockerComposeYaml
+				}, &dockerComposeYaml).
 				OptionsFunc(func() []huh.Option[string] {
-					serviceKeys, err := getDockerServiceArray(dockerComposeYml)
+					serviceKeys, err := getDockerServiceArray(dockerComposeYaml)
 					if err != nil {
 						serviceKeys = []string{"Error: " + err.Error()}
 					}
 					return huh.NewOptions(serviceKeys...)
-				}, &dockerComposeYml /* only this function when `dockerComposeYml` changes */),
+				}, &dockerComposeYaml /* only this function when `dockerComposeYaml` changes */),
 		),
 	)
 
@@ -212,7 +212,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = runDockerExec(dockerComposeYml, dockerService)
+	err = runDockerExec(dockerComposeYaml, dockerService)
 	if err != nil {
 		fmt.Printf("Error: %s\n", err)
 		os.Exit(1)
