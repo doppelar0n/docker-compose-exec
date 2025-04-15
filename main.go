@@ -186,11 +186,9 @@ func main() {
 			huh.NewSelect[string]().
 				Options(huh.NewOptions(allComposeFiles...)...).
 				Value(&dockerComposeYml).
-				Title("Docker Compose yml").
-				Height(5),
+				Title("Docker Compose yml"),
 			huh.NewSelect[string]().
 				Value(&dockerService).
-				Height(8).
 				TitleFunc(func() string {
 					return "Services in " + dockerComposeYml
 				}, &dockerComposeYml).
