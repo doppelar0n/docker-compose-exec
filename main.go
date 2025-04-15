@@ -29,33 +29,7 @@ func isDirectory(path string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func getSubdirectories(basePath string) ([]string, error) {
-	entries, err := os.ReadDir(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	var subdirs []string
-	for _, entry := range entries {
-		if entry.IsDir() {
-			subdirs = append(subdirs, filepath.Join(basePath, entry.Name()))
-		}
-	}
-	return subdirs, nil
-}
-
-func getComposeFileInDir(dir string) (string, error) {
-	composeFiles := []string{"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}
-	for _, file := range composeFiles {
-		fullPath := filepath.Join(dir, file)
-		if _, err := os.Stat(fullPath); err == nil {
-			return fullPath, nil
-		}
-	}
-	return "", fmt.Errorf("no Docker Compose in %s found", dir)
-}
-
-func getComposeFiles(basePath string) ([]string, error) {
+func getComposeFilesInDir(basePath string) ([]string, error) {
 	isDir, err := isDirectory(basePath)
 	if err != nil {
 		return nil, err
@@ -64,17 +38,31 @@ func getComposeFiles(basePath string) ([]string, error) {
 		return nil, fmt.Errorf("%s is not a Directory", basePath)
 	}
 
-	subdirs, err := getSubdirectories(basePath)
+	composeFileNames := []string{"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}
+	var composeFiles []string
+	
+	err = filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			for _, fileName := range composeFileNames {
+				if filepath.Base(path) == fileName {
+					composeFiles = append(composeFiles, path)
+					break
+				}
+			}
+		}
+		return nil
+	})
+
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("error while scanning directory %s: %w", basePath, err)
 	}
 
-	var composeFiles []string
-	for _, dir := range subdirs {
-		composeFile, err := getComposeFileInDir(dir)
-		if err == nil {
-			composeFiles = append(composeFiles, composeFile)
-		}
+	if len(composeFiles) == 0 {
+		return nil, fmt.Errorf("no Docker Compose files found in %s", basePath)
 	}
 
 	return composeFiles, nil
@@ -105,7 +93,7 @@ func getAllComposeFiles() ([]string, string, error) {
 	paths := getAllComposeSearchPaths()
 
 	for _, path := range paths {
-		currentComposeFilePaths, _ := getComposeFiles(path)
+		currentComposeFilePaths, _ := getComposeFilesInDir(path)
 		composeFilePaths = append(composeFilePaths, currentComposeFilePaths...)
 	}
 
