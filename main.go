@@ -11,10 +11,12 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"strconv"
 )
 
 var defaultContainerBasePath = "/var/container:/srv/container"
 var defaultContainerExecCommand = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
+var defaultMaxDepth = 2
 
 //go:embed HELP.md
 var help string
@@ -29,8 +31,7 @@ func isDirectory(path string) (bool, error) {
 	return info.IsDir(), nil
 }
 
-func getComposeFilesInDir(basePath string) ([]string, error) {
-	maxDepth := 3
+func getComposeFilesInDir(basePath string, maxDepth int) ([]string, error) {
 	isDir, err := isDirectory(basePath)
 	if err != nil {
 		return nil, err
@@ -103,8 +104,20 @@ func getAllComposeFiles() ([]string, string, error) {
 	var composeFilePaths []string
 	paths := getAllComposeSearchPaths()
 
+	maxDepthString := os.Getenv("CONTAINER_BASE_PATH_MAX_DEPTH")
+	maxDepth, err := strconv.Atoi(maxDepthString)
+	if err != nil {
+		if maxDepthString != "" {
+			fmt.Printf("Invalid value for CONTAINER_BASE_PATH_MAX_DEPTH: %s. Using default: %d\n", maxDepthString, defaultMaxDepth)
+		}
+		maxDepth = defaultMaxDepth
+	}
+	if maxDepth < 1 {
+		maxDepth = 1
+	}
+
 	for _, path := range paths {
-		currentComposeFilePaths, _ := getComposeFilesInDir(path)
+		currentComposeFilePaths, _ := getComposeFilesInDir(path, maxDepth)
 		composeFilePaths = append(composeFilePaths, currentComposeFilePaths...)
 	}
 

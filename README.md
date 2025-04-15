@@ -84,6 +84,10 @@ Running `docker-compose-exec` will:
     ```bash
     CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
     ```
+- You can set the maximum depth of the recursive search for Docker Compose files (default depth is 2).
+    ```bash
+    CONTAINER_BASE_PATH_MAX_DEPTH="5" docker-compose-exec
+    ```
 
 
 ## Contributing
