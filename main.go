@@ -30,20 +30,31 @@ func isDirectory(path string) (bool, error) {
 }
 
 func getComposeFilesInDir(basePath string) ([]string, error) {
+	maxDepth := 3
 	isDir, err := isDirectory(basePath)
 	if err != nil {
 		return nil, err
 	}
 	if !isDir {
-		return nil, fmt.Errorf("%s is not a Directory", basePath)
+		return nil, fmt.Errorf("%s is not a directory", basePath)
 	}
 
 	composeFileNames := []string{"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}
 	var composeFiles []string
-	
+
 	err = filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
+		}
+
+		relativePath, err := filepath.Rel(basePath, path)
+		
+		if err != nil {
+			return err
+		}
+		depth := strings.Count(relativePath, string(os.PathSeparator))
+		if depth >= maxDepth {
+			return filepath.SkipDir
 		}
 
 		if !info.IsDir() {
@@ -62,7 +73,7 @@ func getComposeFilesInDir(basePath string) ([]string, error) {
 	}
 
 	if len(composeFiles) == 0 {
-		return nil, fmt.Errorf("no Docker Compose files found in %s", basePath)
+		return nil, fmt.Errorf("no docker compose files found in %s", basePath)
 	}
 
 	return composeFiles, nil
@@ -177,7 +188,7 @@ func main() {
 		os.Exit(1)
 	}
 	if len(allComposeFiles) == 0 {
-		fmt.Printf("Error: no docker Docker Compose YAML found in %s\n", paths)
+		fmt.Printf("Error: no docker compose YAML found in %s\n", paths)
 		os.Exit(1)
 	}
 
