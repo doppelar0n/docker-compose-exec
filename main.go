@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "embed"
+	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/charmbracelet/huh"
@@ -10,12 +12,13 @@ import (
 	"os/exec"
 	"path/filepath"
 	"slices"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 var defaultContainerBasePath = "/var/container:/srv/container"
 var defaultContainerExecCommand = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
+var defaultContainerExecCommandNotRunning = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
 var defaultMaxDepth = 2
 
 //go:embed HELP.md
@@ -23,19 +26,16 @@ var help string
 
 var version = "development"
 
-func isDirectory(path string) (bool, error) {
+func isDirectory(path string) (bool) {
 	info, err := os.Stat(path)
 	if err != nil {
-		return false, err
+		return false
 	}
-	return info.IsDir(), nil
+	return info.IsDir()
 }
 
 func getComposeFilesInDir(basePath string, maxDepth int) ([]string, error) {
-	isDir, err := isDirectory(basePath)
-	if err != nil {
-		return nil, err
-	}
+	isDir := isDirectory(basePath)
 	if !isDir {
 		return nil, fmt.Errorf("%s is not a directory", basePath)
 	}
@@ -43,7 +43,7 @@ func getComposeFilesInDir(basePath string, maxDepth int) ([]string, error) {
 	composeFileNames := []string{"docker-compose.yml", "docker-compose.yaml", "compose.yml", "compose.yaml"}
 	var composeFiles []string
 
-	err = filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
+	err := filepath.Walk(basePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -150,10 +150,40 @@ func getDockerServiceArray(dockerComposeYaml string) ([]string, error) {
 	return serviceKeys, nil
 }
 
+func isDockerRunning(dockerComposeYaml string, dockerService string) bool {
+	cmd := exec.Command("docker", fmt.Sprintf("compose -f %s ps %s --format json", dockerComposeYaml, dockerService))
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	err := cmd.Run()
+	if err != nil {
+		return false
+	}
+
+	var jsonData map[string]interface{}
+	err = json.Unmarshal(out.Bytes(), &jsonData)
+	if err != nil {
+		return false
+	}
+	if len(jsonData) == 0 {
+		return false
+	}
+	if jsonData["State"] == "running" {
+		return true
+	}
+
+	return false
+}
+
 func runDockerExec(dockerComposeYaml string, dockerService string) error {
 	dockerExecCommand := os.Getenv("CONTAINER_EXEC_COMMAND")
 	if dockerExecCommand == "" {
 		dockerExecCommand = defaultContainerExecCommand
+	}
+
+	dockerExecCommandNotRunningExec := os.Getenv("CONTAINER_EXEC_COMMAND_NOT_RUNNING")
+	if dockerExecCommandNotRunningExec == "" {
+		dockerExecCommandNotRunningExec = defaultContainerExecCommandNotRunning
 	}
 
 	dockerExecCommandParts := strings.Split(dockerExecCommand, " ")
@@ -166,10 +196,27 @@ func runDockerExec(dockerComposeYaml string, dockerService string) error {
 		}
 	}
 
-	fmt.Printf("dockerExecCommand: %s\n", dockerExecCommand)
-	fmt.Printf("runDockerCommand:  %s\n", strings.Join(dockerExecCommandParts, " "))
+	dockerExecCommandNotRunningExecParts := strings.Split(dockerExecCommandNotRunningExec, " ")
+	for i, part := range dockerExecCommandNotRunningExecParts {
+		switch part {
+		case "%COMPOSE":
+			dockerExecCommandNotRunningExecParts[i] = dockerComposeYaml
+		case "%SERVICE":
+			dockerExecCommandNotRunningExecParts[i] = dockerService
+		}
+	}
 
-	cmd := exec.Command(dockerExecCommandParts[0], dockerExecCommandParts[1:]...)
+	var cmd *exec.Cmd
+	if isDockerRunning(dockerComposeYaml, dockerService) {
+		fmt.Printf("Docker container %s %s is running\n", dockerComposeYaml, dockerService)
+		fmt.Printf("exec:  %s\n", strings.Join(dockerExecCommandParts, " "))
+		cmd = exec.Command(dockerExecCommandParts[0], dockerExecCommandParts[1:]...)
+	} else {
+		fmt.Printf("Docker container %s %s is NOT running\n", dockerComposeYaml, dockerService)
+		fmt.Printf("exec:  %s\n", strings.Join(dockerExecCommandNotRunningExecParts, " "))
+		cmd = exec.Command(dockerExecCommandNotRunningExecParts[0], dockerExecCommandNotRunningExecParts[1:]...)
+	}
+
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
@@ -201,7 +248,7 @@ func main() {
 		os.Exit(1)
 	}
 	if len(allComposeFiles) == 0 {
-		fmt.Printf("Error: no docker compose YAML found in %s\n", paths)
+		fmt.Printf("No docker compose YAML found in %s\n", paths)
 		os.Exit(1)
 	}
 
