@@ -42,10 +42,22 @@ You can configure the following environment variables:
     export CONTAINER_BASE_PATH="/path/to/containers:/another/path"
     ```
     Default paths include `/var/container` and `/srv/container`.
+    You can limit the search depth with CONTAINER_BASE_PATH_MAX_DEPTH.
+    ```bash
+    export CONTAINER_BASE_PATH="4"
+    ```
+    Default depth is 2.
 - CONTAINER_EXEC_COMMAND
     Customize the execution command. Example:
     ```bash
     export CONTAINER_EXEC_COMMAND="docker compose -f %COMPOSE exec --user root %SERVICE /bin/bash"
+    ```
+    - `%COMPOSE` will be replaced with the path to the selected Compose file.
+    - `%SERVICE` will be replaced with the selected service.
+- CONTAINER_EXEC_COMMAND_NOT_RUNNING
+    Customize the execution command if the docker container is not running. Example:
+    ```bash
+    export CONTAINER_EXEC_COMMAND_NOT_RUNNING="echo %COMPOSE %SERVICE is not running."
     ```
     - `%COMPOSE` will be replaced with the path to the selected Compose file.
     - `%SERVICE` will be replaced with the selected service.
@@ -83,6 +95,10 @@ Running `docker-compose-exec` will:
 - This is like dry run. (--dry-run)
     ```bash
     CONTAINER_EXEC_COMMAND="echo %COMPOSE %SERVICE" docker-compose-exec
+    ```
+- `CONTAINER_EXEC_COMMAND` will only be exec if docker compose service is running. If it is not runing `CONTAINER_EXEC_COMMAND_NOT_RUNNING` will be executed.
+    ```bash
+    CONTAINER_EXEC_COMMAND_NOT_RUNNING="echo %COMPOSE %SERVICE is not running" docker-compose-exec
     ```
 - You can set the maximum depth of the recursive search for Docker Compose files (default depth is 2).
     ```bash
