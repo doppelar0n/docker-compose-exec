@@ -89,6 +89,17 @@ Running `docker-compose-exec` will:
     CONTAINER_BASE_PATH_MAX_DEPTH="5" docker-compose-exec
     ```
 
+## Command Line Tips
+
+### Run Lint Locally Before Committing
+```bash
+golangci-lint run -v
+```
+
+### Run the Go Project Locally
+```bash
+go run .
+```
 
 ## Contributing
 
