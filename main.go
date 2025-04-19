@@ -18,7 +18,7 @@ import (
 
 var defaultContainerBasePath = "/var/container:/srv/container"
 var defaultContainerExecCommand = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
-var defaultContainerExecCommandNotRunning = "docker compose -f %COMPOSE exec --user root %SERVICE /bin/sh"
+var defaultContainerExecCommandNotRunning = "docker compose -f %COMPOSE run --user root --entrypoint /bin/sh %SERVICE"
 var defaultMaxDepth = 2
 
 //go:embed HELP.md
@@ -151,7 +151,9 @@ func getDockerServiceArray(dockerComposeYaml string) ([]string, error) {
 }
 
 func isDockerRunning(dockerComposeYaml string, dockerService string) bool {
-	cmd := exec.Command("docker", fmt.Sprintf("compose -f %s ps %s --format json", dockerComposeYaml, dockerService))
+	dockerCeckCommand := fmt.Sprintf("docker compose -f %s ps %s --format json", dockerComposeYaml, dockerService)
+	dockerCeckCommandParts := strings.Split(dockerCeckCommand, " ")
+	cmd := exec.Command(dockerCeckCommandParts[0], dockerCeckCommandParts[1:]...)
 
 	var out bytes.Buffer
 	cmd.Stdout = &out
@@ -208,7 +210,6 @@ func runDockerExec(dockerComposeYaml string, dockerService string) error {
 
 	var cmd *exec.Cmd
 	if isDockerRunning(dockerComposeYaml, dockerService) {
-		fmt.Printf("Docker container %s %s is running\n", dockerComposeYaml, dockerService)
 		fmt.Printf("exec:  %s\n", strings.Join(dockerExecCommandParts, " "))
 		cmd = exec.Command(dockerExecCommandParts[0], dockerExecCommandParts[1:]...)
 	} else {
