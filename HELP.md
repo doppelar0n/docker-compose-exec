@@ -8,8 +8,10 @@ Options:
   --version             Show the tool's version and exit
 
 Environment Variables:
-  CONTAINER_BASE_PATH     Additional paths to search for Compose files, separated by ":"
-  CONTAINER_EXEC_COMMAND  Default command template for execution (e.g., "docker compose -f %COMPOSE exec %SERVICE /bin/bash")
+  CONTAINER_BASE_PATH                Additional paths to search for Compose files, separated by ":"
+  CONTAINER_BASE_PATH_MAX_DEPTH      Compose file max search depth (Default: 2)
+  CONTAINER_EXEC_COMMAND             Default command template for execution (e.g., "docker compose -f %COMPOSE exec %SERVICE /bin/bash")
+  CONTAINER_EXEC_COMMAND_NOT_RUNNING Command template for execution if docker container is not running
 
 Examples:
   docker-compose-exec
