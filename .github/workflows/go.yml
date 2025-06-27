@@ -65,11 +65,16 @@ jobs:
       run: |
         GOARCH=${{ matrix.arch }} go build -ldflags "-X main.version=${{ env.TAG_NAME }}" -o docker-compose-exec-${{ matrix.arch }}
 
+    - name: Generate SHA256
+      run: sha256sum docker-compose-exec-${{ matrix.arch }} > docker-compose-exec-${{ matrix.arch }}.sha256
+
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
         name: docker-compose-exec-${{ matrix.arch }}
-        path: docker-compose-exec-${{ matrix.arch }}
+        path: |
+          docker-compose-exec-${{ matrix.arch }}
+          docker-compose-exec-${{ matrix.arch }}.sha256
 
   release:
     needs: build
@@ -101,32 +106,11 @@ jobs:
         echo "Using tag: $TAG_NAME"
 
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: ${{ env.TAG_NAME }}
-        release_name: Release ${{ env.TAG_NAME }}
-        draft: false
-        prerelease: false
-
-    - name: Upload Release Asset for amd64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./docker-compose-exec-amd64
-        asset_name: docker-compose-exec-amd64
-        asset_content_type: application/octet-stream
-
-    - name: Upload Release Asset for arm64
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./docker-compose-exec-arm64
-        asset_name: docker-compose-exec-arm64
-        asset_content_type: application/octet-stream
+        artifacts: "docker-compose-exec-*"
+        token: ${{ secrets.PAT_TOKEN }}
+        tag: ${{ env.TAG_NAME }}
+        name: Release ${{ env.TAG_NAME }}
+        commit: ${{ github.sha }}
+        skipIfReleaseExists: true
